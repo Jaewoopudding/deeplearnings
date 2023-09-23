@@ -52,11 +52,11 @@ class InceptionBlock(nn.Module):
     
 
 class GoogleNet(nn.Module):
-    def __init__(self, output_size=10):
+    def __init__(self, input_channel=3, output_size=10):
         super().__init__()
         
         self.model = nn.Sequential(
-            InceptionBlock(in_channel=3, conv11_channel=16*2, conv33_channel=32*2, conv55_channel=16*2, pool_conv_channel=16*2),
+            InceptionBlock(in_channel=input_channel, conv11_channel=16*2, conv33_channel=32*2, conv55_channel=16*2, pool_conv_channel=16*2),
             InceptionBlock(in_channel=80*2, conv11_channel=16*2, conv33_channel=32*2, conv55_channel=16*2, pool_conv_channel=16*2),
             nn.MaxPool2d(2), # 16
             InceptionBlock(in_channel=80*2, conv11_channel=48*2, conv33_channel=32*2, conv55_channel=16*2, pool_conv_channel=32*2),
@@ -67,17 +67,14 @@ class GoogleNet(nn.Module):
             nn.MaxPool2d(2), # 4
             InceptionBlock(in_channel=176*2, conv11_channel=64*2, conv33_channel=48*2, conv55_channel=32*2, pool_conv_channel=64*2),
             InceptionBlock(in_channel=208*2, conv11_channel=64*2, conv33_channel=48*2, conv55_channel=32*2, pool_conv_channel=64*2),
-            nn.MaxPool2d(2), # 2
-            InceptionBlock(in_channel=208*2, conv11_channel=96*2, conv33_channel=64*2, conv55_channel=32*2, pool_conv_channel=64*2),
-            InceptionBlock(in_channel=256*2, conv11_channel=96*2, conv33_channel=64*2, conv55_channel=32*2, pool_conv_channel=64*2),
-            nn.MaxPool2d(2), # 1
+            nn.MaxPool2d(2) # 2
         )
         
-        self.classifier = nn.Linear(512, output_size)
+        self.classifier = nn.Linear(416, output_size)
         
     def forward(self, x):
         x = self.model(x)
-        x = x.squeeze()
+        x = x.mean(dim=(-1, -2))
         return self.classifier(x)
             
     def _init_params(self):
