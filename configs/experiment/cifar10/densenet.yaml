@@ -1,0 +1,32 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: cifar10.yaml
+  - override /model: densenet.yaml
+  - override /callbacks: default.yaml
+  - override /trainer: default.yaml
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["cifar10", "densenet"]
+
+seed: 12345
+
+trainer:
+  min_epochs: 10
+  max_epochs: 200
+  gradient_clip_val: 0.5
+  accelerator: gpu
+  devices: [0, 1, 2, 3, 4, 5]
+
+logger:
+  wandb:
+    project: "CIFAR10-DenseNet"
+    tags: ['DenseNet']
+    name: "DenseNet"
+
+

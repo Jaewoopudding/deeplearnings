@@ -1,0 +1,23 @@
+_target_: src.models.classification_module.ClassificationModule
+
+optimizer:
+  _target_: torch.optim.SGD
+  _partial_: true
+  lr: 0.1
+  momentum: 0.9
+  weight_decay: 1e-4
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.1
+  patience: 10
+
+net:
+  _target_: src.models.components.densenet.DenseNet
+  input_dim: 3
+  hidden_dim: 32
+  growth_rate: 12
+  num_of_layers: [6, 12, 24, 16]
+  output_size: 10
