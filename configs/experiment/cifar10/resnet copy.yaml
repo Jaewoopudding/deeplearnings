@@ -4,7 +4,7 @@
 # python train.py experiment=example
 
 defaults:
-  - override /data: mnist.yaml
+  - override /data: cifar10.yaml
   - override /model: resnet.yaml
   - override /callbacks: default.yaml
   - override /trainer: default.yaml
@@ -12,7 +12,7 @@ defaults:
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 
-tags: ["mnist", "resnet"]
+tags: ["cifar10", "resnet"]
 
 seed: 12345
 
@@ -23,13 +23,9 @@ trainer:
   accelerator: gpu
   devices: [0]
 
-model:
-  net:
-    input_channel: 1
-
 logger:
   wandb:
-    project: "MNIST-ResNet"
+    project: "CIFAR10-ResNet"
     tags: ['ResNet']
     name: "ResNet"
 

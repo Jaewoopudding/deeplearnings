@@ -1,10 +1,11 @@
 _target_: src.models.classification_module.ClassificationModule
 
 optimizer:
-  _target_: torch.optim.Adam
+  _target_: torch.optim.SGD
   _partial_: true
-  lr: 0.001
-  weight_decay: 0.0
+  lr: 0.1
+  momentum: 0.9
+  weight_decay: 1e-4
 
 scheduler:
   _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
@@ -15,7 +16,7 @@ scheduler:
 
 net:
   _target_: src.models.components.resnet.ResNet
-  hidden_dim_list: [16, 16, 16, 32, 32, 32, 64, 64, 64, 128, 128, 128]
+  hidden_dim_list: [16, 16, 16, 32, 32, 32, 64, 64, 64]
   downsample_list: [False, False, True, False, False, True, False, False, True, False, False]
   input_channel: 3
   output_size: 10

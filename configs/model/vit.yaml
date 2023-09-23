@@ -17,10 +17,10 @@ net:
   _target_: src.models.components.vit.ViT
   input_channel: 3
   img_size: 32
-  patch_size: 8
-  dim: 128
-  num_of_heads: 8
-  dropout: 0.1
-  expansion: 4
+  patch_size: 4
+  dim: 192
+  num_of_heads: 12
+  dropout: 0.25
+  expansion: 2
   depth: 12
   output_size: 10

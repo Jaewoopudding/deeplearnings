@@ -119,14 +119,13 @@ hydra:
   overrides:
     hydra:
     - hydra.run.dir="/mnt/HDD/jaewoo/practices/deeplearnings"
-    - hydra.job.name=train_ddp_process_5
+    - hydra.job.name=train_ddp_process_7
     - hydra.mode=RUN
-    task:
-    - experiment=mnist/googlenet
+    task: []
   job:
-    name: train_ddp_process_5
+    name: train_ddp_process_7
     chdir: null
-    override_dirname: experiment=mnist/googlenet
+    override_dirname: ''
     id: ???
     num: ???
     config_name: train.yaml
@@ -159,14 +158,14 @@ hydra:
       debug: null
       local: default.yaml
       hparams_search: null
-      experiment: mnist/googlenet
+      experiment: null
       hydra: default.yaml
       extras: default.yaml
       paths: default.yaml
       trainer: default.yaml
       logger: wandb
       callbacks: default.yaml
-      model: googlenet.yaml
+      model: vit.yaml
       data: cifar10.yaml
       hydra/env: default
       hydra/callbacks: null

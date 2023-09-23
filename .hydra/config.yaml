@@ -1,21 +1,20 @@
 task_name: train
 tags:
-- cifar10
-- googlenet
+- dev
 train: true
 test: true
 compile: false
 ckpt_path: null
-seed: 12345
+seed: null
 data:
   _target_: src.data.cifar10_datamodule.CIFAR10DataModule
   data_dir: ${paths.data_dir}
-  batch_size: 1024
+  batch_size: 256
   train_val_test_split:
   - 45000
   - 5000
   - 10000
-  num_workers: 24
+  num_workers: 48
   pin_memory: true
   persistent_workers: true
 model:
@@ -32,7 +31,15 @@ model:
     factor: 0.1
     patience: 10
   net:
-    _target_: src.models.components.googlenet.GoogleNet
+    _target_: src.models.components.vit.ViT
+    input_channel: 3
+    img_size: 32
+    patch_size: 4
+    dim: 192
+    num_of_heads: 8
+    dropout: 0.25
+    expansion: 2
+    depth: 12
     output_size: 10
 callbacks:
   model_checkpoint:
@@ -74,19 +81,17 @@ logger:
     offline: false
     id: null
     anonymous: null
-    project: CIFAR10-CNN
+    project: lightning-hydra-template
     log_model: false
     prefix: ''
     group: ''
-    tags:
-    - CNN
+    tags: []
     job_type: ''
-    name: CNN
 trainer:
   _target_: lightning.pytorch.trainer.Trainer
   default_root_dir: ${paths.output_dir}
-  min_epochs: 10
-  max_epochs: 200
+  min_epochs: 1
+  max_epochs: 100
   accelerator: gpu
   devices:
   - 0
@@ -99,7 +104,6 @@ trainer:
   - 7
   check_val_every_n_epoch: 1
   deterministic: false
-  gradient_clip_val: 0.5
 paths:
   root_dir: ${oc.env:PROJECT_ROOT}
   data_dir: ${paths.root_dir}/data/

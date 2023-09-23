@@ -21,6 +21,10 @@ trainer:
   max_epochs: 200
   gradient_clip_val: 0.5
 
+model:
+  net:
+    input_channel: 1
+
 logger:
   wandb:
     project: "MNIST-GoogleNet"
