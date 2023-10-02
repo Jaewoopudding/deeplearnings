@@ -89,12 +89,6 @@ class DDPMModule(LightningModule):
             scheduler = self.hparams.scheduler(optimizer=optimizer)
             return {
                 "optimizer":optimizer,
-                "lr_scheduler": {
-                    "scheduler": scheduler,
-                    "monitor": "val/loss",
-                    "interval": "epoch",
-                    "frequency": 2
-                }
             }
         return {"optimizer": optimizer}
     
@@ -145,7 +139,7 @@ class DDPMModule(LightningModule):
         import wandb
         sampled_images = self.sample(self.img_size, 32, channels=3)
         self.logger.experiment.log({
-            "sampled_images": [wandb.Image(img.transpose(1,2,0)) for img in sampled_images[-1]]
+            "sampled_images": [wandb.Image((img.transpose(1,2,0)) / 2 + 0.5) for img in sampled_images[-1]]
         })
 
 
