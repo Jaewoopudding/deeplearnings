@@ -1,0 +1,30 @@
+_target_: src.models.ddpm_module.DDPMModule
+timesteps: 1000
+img_size: 32
+
+diffusion_scheduler: 
+  _target_: src.models.components.diffusion_scheduler.DiffusionScheduler
+  timesteps: 1000
+  std_schedule: cosine
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.001
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.1
+  patience: 10
+
+net:
+  _target_: src.models.components.ddpm_unet_2d.DDPMUnet
+  dim: 32
+  init_dim: 3
+  out_dim: None
+  dim_mults: (1, 4, 8, 16)
+  channels: 3
+  self_condition: False
+  resnet_block_groups: 4

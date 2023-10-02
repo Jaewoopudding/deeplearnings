@@ -20,7 +20,7 @@ net:
   patch_size: 4
   dim: 192
   num_of_heads: 12
-  dropout: 0.25
+  dropout: 0.
   expansion: 2
   depth: 12
   output_size: 10
