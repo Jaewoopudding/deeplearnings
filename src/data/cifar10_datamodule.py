@@ -10,15 +10,18 @@ from torchvision.transforms import transforms
 class CIFAR10DataModule(LightningDataModule):
     def __init__(self,
                  data_dir: str = "data/",
-                 train_val_test_split: Tuple[int, int, int] = (45_000, 5_000, 10_000),
+                 train_val_test_split: Tuple[int, int, int] = (50_000, 5_000, 5_000),
                  batch_size: int = 64,
-                 num_workers: int = 0,
+                 num_workers: int = 1,
                  pin_memory: bool = True,
                  persistent_workers: bool = True):
         super().__init__()
         self.save_hyperparameters(logger=False) # self.hparams activated
         self.transforms = transforms.Compose([
-            transforms.ToTensor(), transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
+            transforms.ToTensor(), 
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)), 
+            transforms.RandomResizedCrop(32, scale=(0.8, 1.0)),
+            transforms.RandomHorizontalFlip()
         ])
         
         self.data_train: Optional[Dataset] = None
@@ -34,7 +37,6 @@ class CIFAR10DataModule(LightningDataModule):
             trainset = CIFAR10(self.hparams.data_dir, train=True, transform=self.transforms)
             validset = CIFAR10(self.hparams.data_dir, train=False, transform=self.transforms)
             dataset = ConcatDataset([trainset, validset])
-            print(dataset.__len__())
             self.data_train, self.data_val, self.data_test = random_split(
                 dataset=dataset,
                 lengths=self.hparams.train_val_test_split,
