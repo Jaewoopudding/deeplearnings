@@ -6,6 +6,7 @@ import torch.nn.functional as F
 
 from lightning import LightningModule
 from torchmetrics import MeanMetric, MinMetric
+import wandb
 
 from src.models.components.diffusion_scheduler import DiffusionScheduler
 
@@ -136,10 +137,9 @@ class DDPMModule(LightningModule):
     
 
     def log_image(self):
-        import wandb
-        sampled_images = self.sample(self.img_size, 32, channels=3)
+        sampled_images = self.sample(self.img_size, 8, channels=3)
         self.logger.experiment.log({
-            "sampled_images": [wandb.Image((img.transpose(1,2,0)) / 2 + 0.5) for img in sampled_images[-1]]
+            "sampled_images": [wandb.Image(((img.transpose(1,2,0).clip(-1, 1) + 1 ) / 2)) for img in sampled_images[-1]]
         })
 
 
