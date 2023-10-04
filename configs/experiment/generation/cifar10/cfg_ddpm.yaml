@@ -1,0 +1,58 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: cifar10.yaml
+  - override /model: cfg_ddpm.yaml
+  - override /callbacks: default.yaml
+  - override /trainer: default.yaml
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["CIFAR10", "DDPM"]
+
+seed: 12345
+
+trainer:
+  min_epochs: 10
+  max_epochs: 2000
+  gradient_clip_val: 1
+  accelerator: gpu
+  devices: [1, 2, 3, 4, 5, 6, 7]
+  check_val_every_n_epoch: 50
+
+model:
+  net:
+    _target_: src.models.components.ddpm_cfg_unet_2d.ConditionedUnet
+    in_channels: 3
+    out_channels: 3
+    block_count: 3
+    num_classes: 10
+    init_depth: 64
+    depth_multiplier: 2
+    time_dim: 256
+    remove_deep_conv: False
+
+diffusion: 
+  noise_steps: 1000
+  img_size: 32
+  num_classes: 10
+  in_channels: 3
+  out_channels: 3
+  noise_schedule: linear
+
+cfg_scale: 3
+label_drop_rate: 0.1
+num_classes: 10
+img_size: 32
+noise_steps: 1000
+in_channels: 3
+
+logger:
+  wandb:
+    project: "CIFAR10-DDPM"
+    tags: ['DDPM']
+    name: "DDPM"

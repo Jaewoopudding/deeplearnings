@@ -19,13 +19,23 @@ data:
   pin_memory: true
   persistent_workers: true
 model:
-  _target_: src.models.ddpm_module.DDPMModule
-  timesteps: 1000
+  _target_: src.models.ddpm_cfg_module.DDPM_CFG_Module
+  cfg_scale: 3
+  label_drop_rate: 0.1
+  num_classes: 10
   img_size: 32
-  diffusion_scheduler:
-    _target_: src.models.components.diffusion_scheduler.DiffusionScheduler
-    timesteps: 1000
-    std_schedule: cosine
+  noise_steps: 1000
+  in_channels: 3
+  diffusion:
+    _target_: src.models.components.diffusion.Diffusion
+    noise_steps: 1000
+    beta_start: 0.0001
+    beta_end: 0.02
+    img_size: 32
+    num_classes: 10
+    in_channels: 3
+    out_channels: 3
+    noise_schedule: linear
   optimizer:
     _target_: torch.optim.Adam
     _partial_: true
@@ -37,18 +47,15 @@ model:
     factor: 0.1
     patience: 10
   net:
-    _target_: src.models.components.ddpm_unet_2d.DDPMUnet
-    dim: 32
-    init_dim: 32
-    out_dim: 3
-    dim_mults:
-    - 1
-    - 4
-    - 8
-    - 16
-    channels: 3
-    self_condition: false
-    resnet_block_groups: 4
+    _target_: src.models.components.ddpm_cfg_unet_2d.ConditionedUnet
+    in_channels: 3
+    out_channels: 3
+    block_count: 3
+    num_classes: 10
+    init_depth: 64
+    depth_multiplier: 2
+    time_dim: 256
+    remove_deep_conv: false
 callbacks:
   model_checkpoint:
     _target_: lightning.pytorch.callbacks.ModelCheckpoint
@@ -124,3 +131,16 @@ extras:
   ignore_warnings: true
   enforce_tags: true
   print_config: true
+diffusion:
+  noise_steps: 1000
+  img_size: 32
+  num_classes: 10
+  in_channels: 3
+  out_channels: 3
+  noise_schedule: linear
+cfg_scale: 3
+label_drop_rate: 0.1
+num_classes: 10
+img_size: 32
+noise_steps: 1000
+in_channels: 3

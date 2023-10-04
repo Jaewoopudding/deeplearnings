@@ -119,14 +119,14 @@ hydra:
   overrides:
     hydra:
     - hydra.run.dir="/mnt/HDD/jaewoo/practices/deeplearnings"
-    - hydra.job.name=train_ddp_process_4
+    - hydra.job.name=train_ddp_process_1
     - hydra.mode=RUN
     task:
-    - experiment=generation/cifar10/ddpm
+    - experiment=generation/cifar10/cfg_ddpm
   job:
-    name: train_ddp_process_4
+    name: train_ddp_process_1
     chdir: null
-    override_dirname: experiment=generation/cifar10/ddpm
+    override_dirname: experiment=generation/cifar10/cfg_ddpm
     id: ???
     num: ???
     config_name: train.yaml
@@ -159,14 +159,14 @@ hydra:
       debug: null
       local: default.yaml
       hparams_search: null
-      experiment: generation/cifar10/ddpm
+      experiment: generation/cifar10/cfg_ddpm
       hydra: default.yaml
       extras: default.yaml
       paths: default.yaml
       trainer: default.yaml
       logger: wandb
       callbacks: default.yaml
-      model: ddpm.yaml
+      model: cfg_ddpm.yaml
       data: cifar10.yaml
       hydra/env: default
       hydra/callbacks: null
