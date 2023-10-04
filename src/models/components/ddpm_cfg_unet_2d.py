@@ -44,14 +44,14 @@ class DoubleConv(nn.Module):
         self.double_conv = nn.Sequential(
             nn.Conv2d(in_channels, mid_channels, kernel_size=3, padding=1, bias=False),
             nn.GroupNorm(1, mid_channels),
-            nn.GeLU(),
+            nn.GELU(),
             nn.Conv2d(mid_channels, out_channels, kernel_size=3, padding=1, bias=False),
             nn.GroupNorm(1, out_channels)
         )
 
     def forward(self, x):
         if self.residual:
-            return F.GeLU(x + self.double_conv(x))
+            return F.gelu(x + self.double_conv(x))
         return self.double_conv(x)
     
 
@@ -104,23 +104,27 @@ class Unet(nn.Module):
 
         self.encoding_conv = DoubleConv(in_channels, init_depth)
         self.downs = nn.ModuleList([])
-        self.midconv1 = DoubleConv(init_depth * depth_multiplier ** block_count, init_depth * depth_multiplier ** block_count),
-        self.midattn = Attention(init_depth * depth_multiplier ** block_count),
+        self.midconv1 = DoubleConv(init_depth * depth_multiplier ** block_count, init_depth * depth_multiplier ** block_count)
+        self.midattn = LinearAttention(init_depth * depth_multiplier ** block_count)
         self.midconv2 = DoubleConv(init_depth * depth_multiplier ** block_count, init_depth * depth_multiplier ** block_count)
         self.ups = nn.ModuleList([])
-        self.decoding_conv = DoubleConv(in_channels, out_channels)
+        self.decoding_conv = DoubleConv(init_depth, out_channels)
 
         for idx in range(block_count):
             inp = depth_multiplier ** (idx) * (init_depth)
             out = depth_multiplier ** (idx + 1) * (init_depth)
             self.downs.append(
-                DoubleConv(inp, out),
-                Attention(out)
+                nn.ModuleList([
+                    Down(inp, out),
+                    LinearAttention(out)
+                ])
             )
 
             self.ups.insert(0, 
-                DoubleConv(out * 2, inp),
-                Attention(inp)
+                nn.ModuleList([
+                    Up(int(out * 1.5), inp),
+                    LinearAttention(inp)
+                ])
             )
 
     def pos_encoding(self, t, channels):
@@ -138,21 +142,20 @@ class Unet(nn.Module):
         
     def unet_forward(self, x, t):
         h = []
-        x = self.encoding_conv(x, t)
-        h.append(x)
+        x = self.encoding_conv(x)
         for conv, attn in self.downs:
+            h.append(x)
             x = conv(x, t)
             x = attn(x)
-            h.append(x)
 
-        x = self.midconv1(x, t)
+        x = self.midconv1(x)
         x = self.midattn(x)
-        x = self.midconv2(x, t) 
+        x = self.midconv2(x) 
 
         for conv, attn in self.ups:
             x = conv(x, h.pop(), t)
             x = attn(x)
-        x = self.decoding_conv(x, t)
+        x = self.decoding_conv(x)
         return x
 
 
@@ -167,6 +170,10 @@ class ConditionedUnet(Unet):
     def forward(self, x, t, y=None):
         t = self.pos_encoding(t.unsqueeze(-1), self.time_dim)
         if y is not None:
-            label_emb = self.label_emb(y)
-        emb = t + label_emb
-        return self.unet_forward(x, emb)
+            emb = self.label_emb(y)
+        if y is None:
+            y = torch.zeros(x.shape[0]).long().to(x.device)
+            emb = self.label_emb(y)
+            emb[:] =0.
+        t += emb 
+        return self.unet_forward(x, t)
